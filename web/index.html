@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            form div{ display: flex; justify-content: space-between}
+            form{ max-width: 300px; padding: 20px}
+            table{ padding: 20px}
+            form div input{ width: 180px}
+            .opt_visible{ display: auto}
+        </style>
+    </head>
+    <body>
+        <div>Persons DB</div>
+
+        <div id="persons">
+        <button onclick="getPersons()">To persons list</button>
+            <table>
+                <thead>
+                <th class="opt_invisible">Id</th>    
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Birth Date</th>
+                <th>Salary</th>
+                </thead>  
+                <tbody id="persons-tbody"></tbody>
+            </table>
+
+
+            <form id="person-form" onsubmit="return false;">
+                <div class="opt_visible">
+                    <label>ID:</label>
+                    <input type="text" name="personId" style="width: 25px">
+                </div>
+                <div>
+                    <label>First name:</label>
+                    <input type="text" name="firstName" >
+                </div>
+                <div>
+                    <label> Last name:</label>
+                    <input type="text" name="lastName" >
+                </div>
+                <div>
+                    <label> Birth date:</label>
+                    <input type="date" name="birthDate" >    
+                </div>
+                <div>
+                    <label> Salary:</label>
+                    <input type="text" name="salary" pattern="\d+(.\d{2})?" >    
+                </div>            
+                <div style="justify-content: flex-end">           
+                    <button onclick="return addOrUpdatePerson();">SaveORUpdate</button>
+                </div>                   
+            </form>
+        </div>
+
+
+        <div id="contacts">   
+            <button onclick="getPersons()">To persons list</button>
+            <table>
+                <thead>
+                <th class="opt_invisible">Id</th>    
+                <th>Contact Type</th>
+                <th>Contact</th>
+                </thead>  
+                <tbody id="contacts-tbody"></tbody>
+            </table>
+            <form id="contact-form">
+                <div class="opt_visible">
+                    <label>ID:</label>
+                    <input type="text" name="id" style="width: 25px">
+                </div>
+                <!--                 maybe not needed-->
+                <div class="opt_visible">
+                    <label> Person ID:</label>
+                    <input type="text" name="personId" style="width: 25px">
+                </div> 
+                <div>
+                    <label>Contact Type:</label>
+                    <input type="text" name="contactType" >
+                </div>
+                <div>
+                    <label>Contact:</label>
+                    <input type="text" name="contact" >
+                </div>            
+                <div style="justify-content: flex-end">           
+                    <button onclick="addOrUpdateContact()">SaveORUpdate</button>
+                </div>                   
+            </form>
+        </div>
+
+
+        <div id="addresses">   
+            <button onclick="getPersons()">To persons list</button>
+            <table>
+                <thead>
+                <th class="opt_visible">Id</th>    
+                <th>Address</th>
+                <th>City</th>
+                <th>Postal Code</th>
+                </thead>  
+                <tbody id="addresses-tbody"></tbody>
+            </table>
+            <form id="address-form">
+                <div class="opt_visible">
+                    <label>ID:</label>
+                    <input type="text" name="id" style="width: 25px">
+                </div>
+                <!--                 maybe not needed-->
+                <div class="opt_visible">
+                    <label> Person ID:</label>
+                    <input type="text" name="personId" style="width: 25px">
+                </div> 
+                <div>
+                    <label>Address:</label>
+                    <input type="text" name="address">
+                </div>
+                <div>
+                    <label>City:</label>
+                    <input type="text" name="city">
+                </div>
+                <div>
+                    <label>Postal Code:</label>
+                    <input type="text" name="postalCode">
+                </div>
+
+                <div style="justify-content: flex-end">           
+                    <button onclick="addOrUpdateAddress()">SaveORUpdate</button>
+                </div>                   
+            </form>                     
+        </div>
+
+        <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script type="text/javascript" language="javascript">
+
+                        // The root URL for the RESTful services
+                        var personsURL = "/CRUDv4/rest/personsSevices";
+                        var contactsURL = "/CRUDv4/rest/contactsSevices";
+                        var addressesURL = "/CRUDv4/rest/addressesSevices";
+
+                        var currentPersonId;
+                        
+                        $( document ).ready( getPersons );
+
+
+                        function getPersons() {
+                            $("#contacts").hide();
+                            $("#addresses").hide();
+                            $("#persons").show();
+                            personsAll();
+                        }
+
+                        function getContacts(id) {
+                            $("#persons").hide();
+                            $("#addresses").hide();
+                            $("#contacts").show();
+                            contactsAll(id);
+                            currendPersonId = id;
+                            console.log(currendPersonId);
+                        }
+
+                        function getAddresses(id) {
+                            $("#persons").hide();
+                            $("#addresses").hide();
+                            $("#addresses").show();
+                            addressessAll(id);
+                            currendPersonId = id;
+
+                        }
+
+                        function personsAll() {
+                            getEntities(personsURL, renderPersonsList);                       
+                        }
+
+                        function contactsAll(id) {
+                            var url = contactsURL + "?personId=" + id;
+                            getEntities(url, renderContactsList);
+                        }
+
+                        function addressessAll(id) {
+                            var url = addressesURL + "?personId=" + id;
+                            getEntities(url, renderAddressesList);
+                        }
+
+                        function getEntities(url, successCallback) {
+                           
+                            $.ajax({
+                                type: "GET",
+                                url: url,
+                                dataType: "json",
+                                success: successCallback,
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    console.log("error: " + jqXHR + textStatus + errorThrown);
+                                }
+                            });
+
+                        }
+
+                        function renderPersonsList(data) {                                                     
+                            data = data || [];
+                            var pTableElem = $("#persons-tbody");
+
+                            pTableElem.empty();
+
+                            $.each(data, function (index, person) {
+                                pTableElem.append(
+                                        $("<tr/>").append(
+                                        $("<td/>", {text: person.id, class: "personId"}),
+                                        $("<td/>", {text: person.firstName}),
+                                        $("<td/>", {text: person.lastName}),
+                                        $("<td/>", {text: person.birthDate}),
+                                        $("<td/>", {text: person.salary}),                                        
+                                        $("<td/>").append(
+                                        $("<button/>", {"onclick": "selectPersonById(" + person.id + ")", text: "Select"})),
+                                        $("<td/>").append(
+                                        $("<button/>", {"onclick": "deletePersonById(" + person.id + ")", text: "Delete"})),
+                                        $("<td/>").append(
+                                        $("<button/>", {"onclick": "getContacts(" + person.id + ")", text: "Contacts"})),
+                                        $("<td/>").append(
+                                        $("<button/>", {"onclick": "getAddresses(" + person.id + ")", text: "Addresses"}))                            
+                                        ));
+                            });                                                                                   
+                        }
+
+                        function renderContactsList(data) {
+                            data = data || [];
+                            var cTableElem = $("#contacts-tbody");
+
+                            cTableElem.empty();
+
+                            $.each(data, function (index, contact) {
+                                cTableElem.append(
+                                        $("<tr/>").append(
+                                        $("<td/>", {text: contact.id, class: "contactId"}),
+                                        $("<td/>", {text: contact.contactType}),
+                                        $("<td/>", {text: contact.contact}),
+                                        $("<td/>").append(
+                                        $("<button/>", {"onclick": "selectContactById(" + contact.id + ")", text: "Select"})),
+                                        $("<td/>").append(
+                                        $("<button/>", {"onclick": "deleteContactById(" + contact.id + ")", text: "Delete"}))
+                                        ));
+                            });
+                        }
+
+                        function renderAddressesList(data) {                            
+                            data = data || [];
+                            var aTableElem = $("#addresses-tbody");
+
+                             aTableElem.empty();
+
+                            $.each(data, function (index, address) {
+                                aTableElem.append(
+                                        $("<tr/>").append(
+                                        $("<td/>", {text: address.id, class: "addressId"}),
+                                        $("<td/>", {text: address.address}),
+                                        $("<td/>", {text: address.city}),
+                                        $("<td/>", {text: address.postalCode}),
+                                        $("<td/>").append(
+                                        $("<button/>", {"onclick": "selectAddressById(" + address.id + ")", text: "Select"})),
+                                        $("<td/>").append(
+                                        $("<button/>", {"onclick": "deleteAddressById(" + address.id + ")", text: "Delete"}))
+                                        ));
+                            });                     
+                          
+                        }
+
+                        function selectPersonById(id) {
+                            selectEntityById(personsURL, id, fillPersonForm);
+                        }
+
+                        function selectContactById(id) {
+                            selectEntityById(contactsURL, id, fillContactForm);
+                        }
+
+                        function selectAddressById(id) {
+                            selectEntityById(addressesURL, id, fillAddressForm);
+                        }
+
+
+                        function selectEntityById(url, id, successCallback) {
+                            $.ajax({
+                                type: "GET",
+                                url: url + "/" + id,
+                                dataType: "json",
+                                success: successCallback
+
+                            });
+                        }
+
+
+                        function addOrUpdatePerson() {                        
+                            addOrUpdateEntity(personsURL, personFormToJSON(), personsAll); 
+                            return false;
+                        }
+                        
+                        function addOrUpdateContact(){
+                            
+                            var url = `${personsURL}/${currendPersonId}/addContact`;
+                            var data = contactFormToJSON();
+                            var successCallback = function () {
+                               contactsAll(currendPersonId);};
+                            addOrUpdateEntity(url, data, successCallback); 
+                                                      
+                        }
+                        
+                         function addOrUpdateAddress(){
+                            var url = `${personsURL}/${currendPersonId}/addAddress`;
+                            var data = addressFormToJSON();
+                            var successCallback = function () {
+                               addressessAll(currendPersonId);};
+                            addOrUpdateEntity(url, data, successCallback); 
+        
+                        }
+                        
+                         function addOrUpdateEntity(url, data, successCallback){
+                             console.log(data);
+                             $.ajax({
+                                type: "POST",
+                                contentType: "application/json",
+                                url: url,
+                                dataType: "json",
+                                data: data,
+                                success: successCallback,
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    console.log("update error: " + jqXHR + textStatus + errorThrown);
+                                }
+                            });                            
+                        }
+
+                        function deletePersonById(id) {
+                            deleteEntityById(personsURL, id, personsAll);
+                        }
+
+                        function deleteContactById(id) {
+
+                            successCallBack = function () {
+                                $("#contacts-tbody tr td[class=\"contactId\"]").filter(function () {
+                                    return $(this).text() === "" + id;
+                                }).parent().remove();
+                            };
+
+                            deleteEntityById(contactsURL, id, successCallBack);
+                        }
+
+                        function deleteAddressById(id) {
+                            successCallBack = $("#addresses-tbody tr td:contains('" + id + "')").parent().remove();
+                            deleteEntityById(addressesURL, id, successCallBack);
+                        }
+
+
+                        function deleteEntityById(url, id, successCallBack) {
+                            $.ajax({
+                                type: "DELETE",
+                                url: url + "/" + id,
+                                success: successCallBack
+                            });
+
+                        }
+
+                        function fillPersonForm(data) {   
+                            
+                            $("#person-form input[name=\"personId\"]").val(data.id);
+                            $("#person-form input[name=\"firstName\"]").val(data.firstName);
+                            $("#person-form input[name=\"lastName\"]").val(data.lastName);
+                            $("#person-form input[name=\"birthDate\"]").val(data.birthDate);
+                            $("#person-form input[name=\"lastName\"]").val(data.lastName);
+                            $("#person-form input[name=\"salary\"]").val(data.salary);
+                        }
+
+                        function fillContactForm(data) {
+                            
+                            $("#contact-form input[name=\"id\"]").val(data.id);
+                            $("#contact-form input[name=\"personId\"]").val(data.personId.id);
+                            $("#contact-form input[name=\"contactType\"]").val(data.contactType);
+                            $("#contact-form input[name=\"contact\"]").val(data.contact);
+                        }
+
+                        function fillAddressForm(data) {
+                            
+                            $("#address-form input[name=\"id\"]").val(data.id);
+                            $("#address-form input[name=\"personId\"]").val(data.personId.id);
+                            $("#address-form input[name=\"address\"]").val(data.address);
+                            $("#address-form input[name=\"city\"]").val(data.city);
+                            $("#address-form input[name=\"postalCode\"]").val(data.postalCode);
+                        }
+
+                        // Helper function to serialize all the form fields into a JSON string
+                        function personFormToJSON() {
+
+                            var personId = $("#person-form input[name=\"personId\"]").val();
+                            var salary = parseFloat($("#person-form input[name=\"salary\"]").val());
+                            return JSON.stringify({
+                                "id": personId === "" ? null : personId,
+                                "firstName": $("#person-form input[name=\"firstName\"]").val(),
+                                "lastName": $("#person-form input[name=\"lastName\"]").val(),
+                                "birthDate": $("#person-form input[name=\"birthDate\"]").val(),
+                                "salary": "" ? null : salary
+                            });
+                        }
+                        
+                         function contactFormToJSON() {
+
+                            var contactId = $("#contact-form input[name=\"id\"]").val();
+                            return JSON.stringify({
+                                "id": contactId === "" ? null : contactId,
+                                "personId" : null,
+                                "contactType" : $("#contact-form input[name=\"contactType\"]").val(),
+                                "contact": $("#contact-form input[name=\"contact\"]").val()                                
+                            });
+                        }
+                        
+                        function addressFormToJSON() {
+
+                            var contactId = $("#address-form input[name=\"id\"]").val();
+                            return JSON.stringify({
+                                "id": contactId === "" ? null : contactId,
+                                "personId" : null,
+                                "address" : $("#address-form input[name=\"address\"]").val(),
+                                "city" : $("#address-form input[name=\"city\"]").val(),
+                                "postalCode": $("#address-form input[name=\"postalCode\"]").val()                                
+                            });
+                        }
+
+        </script>
+    </body>
+</html>
